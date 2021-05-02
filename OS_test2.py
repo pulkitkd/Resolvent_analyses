@@ -44,7 +44,7 @@ L[n-1, :] = 0.
 L[0, 0] = 1.
 L[n-1, n-1] = 1.
 
-L[n :] = 0.
+L[n, :] = 0.
 L[2*n-1, :] = 0.
 L[n, n] = 1.
 L[2*n-1, 2*n-1] = 1.
@@ -66,24 +66,24 @@ M[2*n-1, :] = 0.
 """
 Solve the generalized eigenvalue problem L x = i omega M x
 """
-# w, v = eig(L, b=M, check_finite=True)
+w, v = eig(L, b=M, check_finite=True)
 
-# """
-# Get the eigenvalues with largest imaginary parts
-# """
-# w = -1j*w
-# w = np.sort_complex(w)
-# print("Eigenvalues = ", w)
+"""
+Get the eigenvalues with largest imaginary parts
+"""
+w = -1j*w
+w = np.sort_complex(w)
+print("Eigenvalues = ", w)
 
-# """
-# Plot the eigenvalues
-# """
-# plt.scatter(np.real(w), np.imag(w))
-# plt.xlim((0,1))
-# plt.ylim((-1,0))
-# plt.xlabel("real")
-# plt.ylabel("imag")
-# plt.show()
+"""
+Plot the eigenvalues
+"""
+plt.scatter(np.real(w), np.imag(w))
+plt.xlim((0,1))
+plt.ylim((-1,0))
+plt.xlabel("real")
+plt.ylabel("imag")
+plt.show()
 
 "---------------------------Using Matrix Inversion-----------------------------"
 """

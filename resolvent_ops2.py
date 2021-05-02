@@ -1,5 +1,6 @@
 import numpy as np
-from scipy.linalg import eig
+from scipy.linalg import eig, svd, pinv2
+from scipy.sparse.linalg import inv
 
 import matplotlib.pyplot as plt
 from numpy import pi, cos, sin
@@ -12,7 +13,7 @@ Inputs
 Re = 5000.
 Reinv = 1.0/Re
 Ny = 128
-kx = 2.
+kx = 1.
 kz = 0.
 omega = 1.
 
@@ -108,27 +109,57 @@ Let LHS = -i omega + Minv L
 Obtain H as a psuedoinverse of LHS
 Take the SVD of H
 """
-Minv = np.linalg.pinv(M)
+Minv = pinv2(M)
 MinvL = Minv @ L
 
 LHS = -1j*omega*Id2n + MinvL
 # H = np.linalg.lstsq(LHS, np.eye(2*n))[0]
-H = np.linalg.pinv(LHS)
-Psi, Sigma, PhiH = np.linalg.svd(H)
+H = pinv2(LHS)
+Psi, Sigma, PhiH = svd(H)
+Psi2, Sigma2, PhiH2 = svd(LHS)
+
+v0 = Psi[0:n, 0]
+v1 = Psi[0:n, 1]
+v2 = Psi[0:n, 2]
+
+v0sq = v0*v0
+
+print(v2@v0)
 
 "Plotting"
 counts = linspace(1, 2*n, 2*n)
+fig = plt.figure()
 plt.scatter(counts,Sigma)
+plt.title('Singular values '+str(kx)+'-'+str(kz)+'-'+str(omega))
 plt.xlabel("index")
 plt.ylabel("sigma")
+# fig.savefig('images/'+str(kx)+'-'+str(kz)+'-'+str(omega)+'_singular_values.png')
 plt.show()
-
-plt.plot(y, Psi[0:n, 0])
+# # str(name)+".png"
+fig1 = plt.figure()
+plt.plot(y, np.real(v0))
+plt.title('First velocity mode '+str(kx)+'-'+str(kz)+'-'+str(omega))
 plt.xlabel("y")
 plt.ylabel("Psi")
+# fig1.savefig('images/'+str(kx)+'-'+str(kz)+'-'+str(omega)+'_velocity'+str(0)+'.png')
 plt.show()
 
-plt.plot(y,PhiH[0, 0:n])
-plt.xlabel("y")
-plt.ylabel("Phi")
-plt.show()
+# fig1 = plt.figure()
+# plt.plot(y, v1)
+# plt.title('Second velocity mode '+str(kx)+'-'+str(kz)+'-'+str(omega))
+# plt.xlabel("y")
+# plt.ylabel("Psi")
+# fig1.savefig('images/'+str(kx)+'-'+str(kz)+'-'+str(omega)+'_velocity'+str(1)+'.png')
+# # plt.show()
+
+# fig1 = plt.figure()
+# plt.plot(y, v2)
+# plt.title('Third velocity mode '+str(kx)+'-'+str(kz)+'-'+str(omega))
+# plt.xlabel("y")
+# plt.ylabel("Psi")
+# fig1.savefig('images/'+str(kx)+'-'+str(kz)+'-'+str(omega)+'_velocity'+str(2)+'.png')
+# # plt.show()
+# # plt.plot(y,PhiH[0, 0:n])
+# # plt.xlabel("y")
+# # plt.ylabel("Phi")
+# # plt.show()

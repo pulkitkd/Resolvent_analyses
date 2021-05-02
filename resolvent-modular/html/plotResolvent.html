@@ -1,0 +1,200 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>plotResolvent</title><meta name="generator" content="MATLAB 9.10"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2021-04-19"><meta name="DC.source" content="plotResolvent.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><pre class="codeinput">Re = 7.5182E+05;
+k = 1;
+n = 1;
+omega = 1;
+N = 16;
+nsvd = 5;
+mode = 1:3;
+[r,su,ss,sv,U0,yP,UP,dU0,dr,H] = resolventSVD(Re,k,n,omega,N,nsvd);
+[usu uss usv] = svds(H,nsvd);
+uss = diag(uss);
+uvmode1sq = usu(N+1:2*N,mode).*conj(usu(N+1:2*N,mode));
+uvmode1sq = uvmode1sq./max(uvmode1sq);
+svmode1sq = su(N+1:2*N,mode).*conj(su(N+1:2*N,mode));
+svmode1sq = svmode1sq./max(svmode1sq);
+vmode3sq = usu(N+1:2*N,3).*conj(usu(N+1:2*N,3));
+vmode3sq = vmode3sq/max(vmode3sq);
+
+
+clf
+
+hold <span class="string">on</span>
+plot(r,svmode1sq(:,1),<span class="string">'-b'</span>)
+plot(r,svmode1sq(:,2),<span class="string">'--b'</span>)
+plot(r,svmode1sq(:,3),<span class="string">':b'</span>)
+plot(r,uvmode1sq(:,1),<span class="string">'-r'</span>)
+plot(r,uvmode1sq(:,2),<span class="string">'--r'</span>)
+plot(r,uvmode1sq(:,3),<span class="string">':r'</span>)
+title(<span class="string">'v velocity modes'</span>)
+legend(<span class="string">'scaled'</span>,<span class="string">''</span>,<span class="string">''</span>,<span class="string">'unscaled'</span>)
+image2 = gcf
+filename = sprintf(<span class="string">'%d-%d-%d-%d-%d-%d-v_velocity_modes.png'</span>,Re,k,n,omega,N,nsvd);
+exportgraphics(image2,filename);
+hold <span class="string">off</span>
+
+clf(<span class="string">'reset'</span>)
+
+hold <span class="string">on</span>
+plot(ss, <span class="string">'-ob'</span>)
+plot(uss, <span class="string">'-or'</span>)
+title(<span class="string">'Singular values'</span>)
+legend(<span class="string">'scaled'</span>,<span class="string">'unscaled'</span>)
+image1 = gcf
+filename = sprintf(<span class="string">'%d-%d-%d-%d-%d-%d-singular_values.png'</span>,Re,k,n,omega,N,nsvd);
+exportgraphics(image1,filename);
+hold <span class="string">off</span>
+</pre><pre class="codeoutput">
+image2 = 
+
+  Figure (Figure) with properties:
+
+      Number: []
+        Name: 'Figure'
+       Color: [0.9400 0.9400 0.9400]
+    Position: [488 342 560 420]
+       Units: 'pixels'
+
+  Use GET to show all properties
+
+
+image1 = 
+
+  Figure (2) with properties:
+
+      Number: 2
+        Name: ''
+       Color: [0.9400 0.9400 0.9400]
+    Position: [488 342 560 420]
+       Units: 'pixels'
+
+  Use GET to show all properties
+
+</pre><img vspace="5" hspace="5" src="plotResolvent_01.png" alt=""> <p><img src="plotResolvent_eq15682195134482745114.png" alt="$x^2+e^{\pi i}$" style="width:48px;height:14px;"></p><p><img src="plotResolvent_eq17467035999183504765.png" alt="$$e^{\pi i} + 1 = 0$$" style="width:69px;height:15px;"></p><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2021a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+Re = 7.5182E+05;
+k = 1;
+n = 1;
+omega = 1;
+N = 16;
+nsvd = 5;
+mode = 1:3;
+[r,su,ss,sv,U0,yP,UP,dU0,dr,H] = resolventSVD(Re,k,n,omega,N,nsvd);
+[usu uss usv] = svds(H,nsvd);
+uss = diag(uss);
+uvmode1sq = usu(N+1:2*N,mode).*conj(usu(N+1:2*N,mode));
+uvmode1sq = uvmode1sq./max(uvmode1sq);
+svmode1sq = su(N+1:2*N,mode).*conj(su(N+1:2*N,mode));
+svmode1sq = svmode1sq./max(svmode1sq);
+vmode3sq = usu(N+1:2*N,3).*conj(usu(N+1:2*N,3));
+vmode3sq = vmode3sq/max(vmode3sq);
+
+
+clf
+
+hold on
+plot(r,svmode1sq(:,1),'-b')
+plot(r,svmode1sq(:,2),'REPLACE_WITH_DASH_DASHb')
+plot(r,svmode1sq(:,3),':b')
+plot(r,uvmode1sq(:,1),'-r')
+plot(r,uvmode1sq(:,2),'REPLACE_WITH_DASH_DASHr')
+plot(r,uvmode1sq(:,3),':r')
+title('v velocity modes')
+legend('scaled','','','unscaled')
+image2 = gcf
+filename = sprintf('%d-%d-%d-%d-%d-%d-v_velocity_modes.png',Re,k,n,omega,N,nsvd);
+exportgraphics(image2,filename);
+hold off
+
+clf('reset')
+
+hold on
+plot(ss, '-ob')
+plot(uss, '-or')
+title('Singular values')
+legend('scaled','unscaled')
+image1 = gcf
+filename = sprintf('%d-%d-%d-%d-%d-%d-singular_values.png',Re,k,n,omega,N,nsvd);
+exportgraphics(image1,filename);
+hold off
+
+%% 
+%%
+% $x^2+e^{\pi i}$
+% 
+% $$e^{\pi i} + 1 = 0$$
+% 
+%%
+
+
+
+##### SOURCE END #####
+--></body></html>
