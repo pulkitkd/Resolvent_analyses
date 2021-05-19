@@ -46,6 +46,6 @@ def get_F(D1, wdiag, ksq, Ny):
     # print("W = ", W)
 
     F = cholesky(W)
-
+    F = F.T
     return F
 ##############################

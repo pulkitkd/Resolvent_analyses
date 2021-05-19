@@ -13,7 +13,7 @@ from get_F import *
 """
 Inputs
 """
-Re = 3000.
+Re = 135.35
 Reinv = 1.0/Re
 Ny = 96
 kx = 1.
@@ -150,10 +150,6 @@ e1 = v1*np.conj(v1)
 e1 = e1/max(e1)
 e2 = v2*np.conj(v2)
 e2 = e2/max(e2)
-
-
-# print("Product of vectors = ",np.linalg.norm(np.dot(v0,v2)))
-# print("Norm of the vector = ",np.linalg.norm(np.dot(v2,v2)))
 
 
 "Plotting"

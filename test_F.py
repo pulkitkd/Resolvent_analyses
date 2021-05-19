@@ -4,7 +4,7 @@ import numpy as np
 
 import matplotlib.pyplot as plt
 from numpy import pi, cos, sin
-from numpy.linalg.linalg import norm
+from numpy.linalg.linalg import norm, inv
 
 from cheb_trefethen import *
 from clencurt import *
@@ -94,4 +94,6 @@ F = get_F(D, wdiag, ksq, Ny)
 
 print("condition number of F = ", np.linalg.cond(F))
 
-print("check ", np.allclose(Id2n, np.linalg.inv(F)@F, rtol=1e-10))
+print("check ", np.allclose(Id2n, inv(F) @ F, rtol=1e-10))
+
+print("check ", np.allclose(F @ inv(F), inv(F) @ F, rtol=1e-10))

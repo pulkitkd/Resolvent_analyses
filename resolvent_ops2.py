@@ -36,7 +36,7 @@ Uyy = D @ Uy
 """
 M and L matrices
 """
-M = np.block([[ksq - D2, Z], [Z, Idn]])
+M = np.block([[ksq*Idn - D2, Z], [Z, Idn]])
 
 Los = 1j*kx*(U)*(ksq*Idn - D2) + 1j*kx*Uyy + Reinv*(ksq**2 + D4 - 2*ksq*D2)
 Lsq = (1j*kx)*(U*Idn) + Reinv*(ksq*Idn - D2)

@@ -12,17 +12,19 @@ from getResolventSVD import *
 """
 Inputs
 """
-Re = 135.35 #Re_tau
-Ny = 96
+# Re = 1005.5 #Re_tau
+Re = 2389.558367 #Re_tau
+Ny = 128
 
 lambdax1p = 10.
 lambdax2p = 1.0e+5
 lambdaz1p = 10.
 lambdaz2p = 1.0e+5
 
-yp = 15.
+yp = 100.
 y1 = yp/Re
-U96 = np.loadtxt('Umean.asc', skiprows=1)
+U96 = np.loadtxt('turbstats_Re_60000.asc', skiprows=3)
+U96 = U96[:, 6]
 D, y96 = cheb(96)
 D, y = cheb(Ny)
 U = np.polyfit(y96, U96, 30)
@@ -30,9 +32,11 @@ U = np.poly1d(U)
 c = U(y1)
 U = U(y)
 
-steps = 10
+steps = 30
 
 E = zeros([steps, steps])
+X = zeros(steps)
+Z = zeros(steps)
 n = Ny + 1;
 Umax = np.max(U)
 
@@ -52,11 +56,12 @@ for i in range(0, steps):
       kx = 2*pi*Re/lambdaxp
       kz = 2*pi*Re/lambdazp
       omega = 2*pi*c*Re/lambdaxp
-      c = omega/kx
       Psi, Sigma, PhiH = getResolventSVD(Re, kx, kz, omega, Ny, U)
-      sigma1 = Sigma[0]**2 + Sigma[1]**2 + Sigma[3]**2 + Sigma[4]**2
+      sigma1 = Sigma[0]**2 + Sigma[1]**2
       totalE = Sigma @ Sigma
       E[i][j] = sigma1/totalE
+      X[j] = lambdaxp;
+      Z[i] = lambdazp;
       lambdaxp = lambdaxp + dlx
    lambdaxp = lambdax1p
    lambdazp = lambdazp + dlz
@@ -64,14 +69,7 @@ for i in range(0, steps):
 
 "Save data to file"
 
-np.savetxt('energy.dat', E, delimiter=',')   # X is an array
-
-"Plotting"
-
-# plt.loglog(variable, singVals)
-# plt.xlabel("c/Umax")
-# plt.ylabel("sigma")
-# plt.title('Singular values kx='+str(kx)+' kz='+str(kz))
-# plt.show()
-
+np.savetxt('energy.dat', E, delimiter=',')
+np.savetxt('X.dat', X, delimiter=',')   
+np.savetxt('Z.dat', Z, delimiter=',')   
 

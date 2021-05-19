@@ -5,6 +5,7 @@ from numpy.linalg.linalg import norm, inv
 from cheb_trefethen import *
 
 from clencurt import *
+from noSlipBC import *
 from get_F import *
 
 def getResolventSVD(Re, kx, kz, omega, Ny, U):
@@ -32,74 +33,47 @@ def getResolventSVD(Re, kx, kz, omega, Ny, U):
     wdiag = np.diag(w)
     
     """
-    B L M matrices
+    M, L and B matrices
     """
     M = np.block([[ksq*Idn - D2, Z], [Z, Idn]])
 
-    Los = 1j*kx*(U)*(ksq*Idn - D2) + 1j*kx*Uyy + Reinv*(ksq**2 + D4 - 2*ksq*D2)
-    Lsq = (1j*kx)*(U*Idn) + Reinv*(ksq*Idn - D2)
-    L = np.block([[Los, Z],[(1j*kz)*(Uy*Idn), Lsq]])
+    Los = 1j*kx*diag(U)@(ksq*Idn - D2) + 1j*kx*(diag(Uyy)) + Reinv*(ksq*Idn - D2)@(ksq*Idn - D2)
+    Lsq = (1j*kx)*(diag(U)) + Reinv*(ksq*Idn - D2)
+    L = np.block([[Los, Z],[(1j*kz)*(diag(Uy)), Lsq]])
 
     B = np.block([[-1j*kx*D, -ksq*Idn, -1j*kz*D],[1j*kz*Idn, Z, -1j*kx*Idn]])
-
+    
+    
+    """
+    Apply boundary conditions on M and L operators
+    v = dv/dy = eta = 0 at the walls
+    
+    BCs are applied in a way to ensure invertibility of M
+    """
+    M, L = noSlipBC(M,L,n)
+    
     """
     Create the LHS operator in the equation
-    (-i*om*M + L)[v^, eta^] = B[fu^, fv^, fw^]
+    (-i*om + Minv*L)[v^, eta^] = Minv*B[fu^, fv^, fw^]
     """
-    LHS = -1j*omega*M + L
+    L1 = inv(M) @ L
+    LHS = -1j*omega*Id2n + L1
 
-    """
-    Apply boundary conditions on LHS and B operators
-    v = dv/dy = eta = 0 at the walls
-    """
-    "v = 0 at the walls"
-    LHS[0, :] = 0.
-    LHS[0, 0] = 1.
-    LHS[n-1, :] = 0.
-    LHS[n-1, n-1] = 1.
-
-    M[0, :] = 0.
-    M[n-1, :] = 0.
-
-    "dv/dy = 0 at the walls"
-    LHS[1, :] = 0.
-    LHS[1, 0:n] = D[0, :]
-    LHS[n-2, :] = 0.
-    LHS[n-2, 0:n] = D[n-1, :]
-
-    M[1, :] = 0.
-    M[n-2, :] = 0.
-
-    "eta = 0 at the walls"
-    LHS[n, :] = 0.
-    LHS[n, n] = 1.
-    LHS[2*n-1, :] = 0.
-    LHS[2*n-1, 2*n-1] = 1.
-
-    M[n, :] = 0
-    M[2*n-1, :] = 0
-    
-    RHS = np.ones(2*n)
-    # RHS[0] = 0
-    # RHS[1] = 0
-    # RHS[2*n-2] = 0
-    # RHS[2*n-1] = 0
     """
     Get the Resolvent matrix defined as inverse of LHS
-    LHS = -i om M + L
-    Obtain H as a solution of LHS x = B y with y = ones(2*n)
-       LHS x = B y
-    => x = LHS^-1 B
-    So obtain it by solving a linear system 
-    Take the SVD of H
     """
     
-    H = np.linalg.solve(LHS, M)
+    # H = np.linalg.solve(LHS, Id2n)
+    H = inv(LHS)
+    
+    # Scale the resolvent
     F = get_F(D, wdiag, ksq, Ny)
     Finv = inv(F)
-
     Hs = F@H@Finv
 
     Psi, Sigma, PhiH = np.linalg.svd(Hs, full_matrices=False)
+    Psi = Finv @ Psi
+    Phi = np.conj(np.transpose(PhiH))
+    Phi = Finv @ Phi
 
     return Psi, Sigma, PhiH

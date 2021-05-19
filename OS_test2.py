@@ -2,19 +2,18 @@ import numpy as np
 from scipy.linalg import eig
 
 import matplotlib.pyplot as plt
-from numpy import pi, cos, sin
+from numpy import pi, cos, sin, diag
 
 from cheb_trefethen import *
-
+from noSlipBC import *
 """
 Inputs
 """
-Re = 5000.
+Re = 8000.
 Reinv = 1.0/Re
 Ny = 128
 kx = 1.
 kz = 0.
-omega = 1.
 
 ksq = kx*kx + kz*kz
 n = Ny+1
@@ -25,90 +24,90 @@ Z = np.zeros((n, n))
 Idn = np.eye(n)
 U = 1. - y*y
 Uy = D @ U
-Uyy = D @ Uy
+Uyy = D2 @ U
 
 """
 M and L matrices
 """
-M = np.block([[ksq - D2, Z], [Z, Idn]])
+Los = 1j*kx*diag(U)@(ksq*Idn - D2) + 1j*kx*diag(Uyy) + Reinv*(D4 - 2*ksq*D2 + ksq*ksq*Idn)
+Lsq = 1j*kx*diag(U) + Reinv*(ksq*Idn - D2)
+L = np.block([[Los, np.zeros((n, n))],[1j*kz*(diag(Uy)), Lsq]])
 
-Los = 1j*kx*(U)*(ksq*Idn - D2) + 1j*kx*Uyy + Reinv*(ksq**2 + D4 - 2*ksq*D2)
-Lsq = (1j*kx)*(U*Idn) + Reinv*(ksq*Idn - D2)
-L = np.block([[Los, Z],[(1j*kz)*(Uy*Idn), Lsq]])
+M = np.block([[(ksq*Idn - D2), np.zeros((n, n))], [np.zeros((n, n)), Idn ]])
 
-"""
-BCs: v = dv/dy = eta = 0 at walls
-"""
-L[0, :] = 0.
-L[n-1, :] = 0.
-L[0, 0] = 1.
-L[n-1, n-1] = 1.
-
-L[n, :] = 0.
-L[2*n-1, :] = 0.
-L[n, n] = 1.
-L[2*n-1, 2*n-1] = 1.
-
-L[1, :] = 0.
-L[n-2, :] = 0.
-L[1, 0:n] = D[0, :]
-L[n-2, 0:n] = D[n-1, :]
-
-M[0, :] = 0.
-M[1, :] = 0.
-
-M[n-1, :] = 0.
-M[n-2, :] = 0.
-
-M[n, :] = 0.
-M[2*n-1, :] = 0.
+# Boundary conditions
+M, L = noSlipBC(M,L,n)
 
 """
 Solve the generalized eigenvalue problem L x = i omega M x
 """
-w, v = eig(L, b=M, check_finite=True)
+w, v = eig(L, b=1j*M, check_finite=True)
 
 """
 Get the eigenvalues with largest imaginary parts
 """
-w = -1j*w
+w = w
 w = np.sort_complex(w)
-print("Eigenvalues = ", w)
+# print("Eigenvalues = ", w)
+print("Eigenvects = ", v)
+
+
+e0 = np.abs(v[0:n, 0])
+e1 = np.abs(v[0:n, 1])
+e2 = np.abs(v[0:n, 2])
+e3 = np.abs(v[0:n, 3])
+e4 = np.abs(v[0:n, 4])
+e5 = np.abs(v[0:n, 5])
 
 """
 Plot the eigenvalues
 """
 plt.scatter(np.real(w), np.imag(w))
 plt.xlim((0,1))
-plt.ylim((-1,0))
+plt.ylim((-1,0.5))
 plt.xlabel("real")
 plt.ylabel("imag")
+plt.grid()
 plt.show()
+
+# plo the eigvects
+fig, axs = plt.subplots(6)
+fig.suptitle('Singular response modes')
+axs[0].plot(y, np.real(e0))
+axs[1].plot(y, np.real(e1))
+axs[2].plot(y, np.real(e2))
+axs[3].plot(y, np.real(e3))
+axs[4].plot(y, np.real(e4))
+axs[5].plot(y, np.real(e5))
+plt.show()
+
 
 "---------------------------Using Matrix Inversion-----------------------------"
 """
 Solve the generalized eigenvalue problem M x = i omega L x
 """
-# Minv = np.block([[np.linalg.inv(ksq - D2), Z], [Z, Idn]])
-# Minv = np.linalg.inv(M)
-
-MinvL = np.linalg.lstsq(M, L)[0]
+Minv = np.linalg.inv(M)
+MinvL = Minv@L
 w, v = eig(MinvL, check_finite=True)
 
 """
 Get the eigenvalues with largest imaginary parts
 """
+
 w = -1j*w
-w = np.sort_complex(w)
-print("Eigenvalues = ", w)
+w = np.sort(w)
+# print("Eigenvalues = ", w)
+
+np.savetxt('OS_eigenvalues.dat', (np.real(w), np.imag(w)), delimiter=',')
 
 """
 Plot the eigenvalues
 """
 plt.scatter(np.real(w), np.imag(w))
 plt.xlim((0,1))
-plt.ylim((-1,0))
+plt.ylim((-1,0.5))
 plt.xlabel("real")
 plt.ylabel("imag")
+plt.grid()
 plt.show()
 

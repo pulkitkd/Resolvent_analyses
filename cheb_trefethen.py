@@ -8,7 +8,7 @@ Input:
 	No. of grid points desired (N)
 Output: 
 	(N+1) X (N+1) differentiation matrix (D)
-	A grid of N+1 Gauss Lobatto points between -1 and 1 (D)
+	A grid of N+1 Gauss Lobatto points between -1 and 1 (x)
 Calling:
 	D, x = cheb(N)
 '''
@@ -22,4 +22,6 @@ def cheb(N):
 	dX = X - X.T
 	D = dot(c,1./c.T)/(dX+eye(N+1))
 	D -= diag(sum(D.T,axis=0))
-	return D, x.reshape(N+1)
+	x = array(x.reshape(N+1))
+	D = array(D)
+	return D, x
