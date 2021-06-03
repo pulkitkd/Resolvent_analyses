@@ -19,7 +19,7 @@ Ny = 200
 kx = 1.
 kz = 0.
 omega = 0.1
-steps = 40
+steps = 25
 U96 = np.loadtxt('turbstats_Re_60000.asc', skiprows=3)
 U96 = U96[:, 6]
 
@@ -38,6 +38,7 @@ Umax = np.max(U)
 omega2 = 1.5
 omega1 = 0.
 stepsize = (omega2-omega1)/steps
+omega = omega1
 
 print("steps = ", steps)
 print("stepsize = ", stepsize)

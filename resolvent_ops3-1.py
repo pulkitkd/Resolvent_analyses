@@ -24,8 +24,8 @@ def resolventNorm(x, y, M, L, F):
 Inputs
 """
 Ny = 200
-Re = 1000
-# Re = 1005.5
+# Re = 1000
+Re = 1005.5
 # Re = 2389.55836707658146
 # lxp = 700
 # lzp = 100
@@ -36,7 +36,7 @@ Re = 1000
 # omega = c/kx
 
 kx = 1.
-kz = 0.
+kz = 6.
 omega = 0.05
 
 Reinv = 1.0/Re
@@ -53,12 +53,12 @@ Idn = np.eye(n)
 Id2n = np.eye(2*n)
 
 "Velocity field and its derivatives"
-# U96 = np.loadtxt('turbstats_Re_60000.asc', skiprows=3)
-# U96 = U96[:, 6]
-# U = np.polyfit(y96, U96, 30)
-# U = np.poly1d(U)
-# U = U(y)
-U = 1 - y**2
+U96 = np.loadtxt('turbstats_Re_60000.asc', skiprows=3)
+U96 = U96[:, 6]
+U = np.polyfit(y96, U96, 30)
+U = np.poly1d(U)
+U = U(y)
+# U = 1 - y**2
 
 Uy = D @ U
 Uyy = D @ Uy
@@ -75,14 +75,19 @@ L = np.block([[Los, Z],[(1j*kz)*(diag(Uy)), Lsq]])
 
 B = np.block([[-1j*kx*D, -ksq*Idn, -1j*kz*D],[1j*kz*Idn, Z, -1j*kx*Idn]])
 
-
-
 """
 Apply boundary conditions on LHS and B operators
 v = dv/dy = eta = 0 at the walls
 """
 M, L = noSlipBC(M,L,n)
 
+G = Id2n
+G[0,0] = 0.
+G[1,1] = 0.
+G[n-2, n-2] = 0.
+G[n-1, n-1] = 0.
+G[n, n] = 0.
+G[2*n-1, 2*n-1] = 0.
 
 
 """
@@ -93,7 +98,7 @@ L1 =  inv(M)@L
 LHS = -1j*omega*Id2n + L1
 
 print("cond(LHS) = ", cond(LHS))
-H = inv(LHS)
+H = inv(LHS) @ G
 
 """
 Scale the resolevnt operator
@@ -133,50 +138,50 @@ f5 = np.abs(Phi[0:n, 10])
 
 
 "Plotting"
-# counts = linspace(1, 20, 20)
-# fig = plt.figure()
-# plt.semilogy(counts, Sigma[0:20],'.')
-# plt.title('Singular values '+str(kx)+'-'+str(kz)+'-'+str(omega))
-# plt.xlabel("index")
-# plt.ylabel("sigma")
-# fig.savefig('images/'+str(kx)+'-'+str(kz)+'-'+str(omega)+'_singular_values.png')
-# plt.show()
+counts = linspace(1, 20, 20)
+fig = plt.figure()
+plt.semilogy(counts, Sigma[0:20],'.')
+plt.title('Singular values '+str(kx)+'-'+str(kz)+'-'+str(omega))
+plt.xlabel("index")
+plt.ylabel("sigma")
+fig.savefig('images/'+str(kx)+'-'+str(kz)+'-'+str(omega)+'_singular_values.png')
+plt.show()
 
-# fig, axs = plt.subplots(6)
-# fig.suptitle('Singular response modes')
-# axs[0].plot(y, np.real(e0))
-# axs[1].plot(y, np.real(e1))
-# axs[2].plot(y, np.real(e2))
-# axs[3].plot(y, np.real(e3))
-# axs[4].plot(y, np.real(e4))
-# axs[5].plot(y, np.real(e5))
-# plt.show()
+fig, axs = plt.subplots(6)
+fig.suptitle('Singular response modes')
+axs[0].plot(y, np.real(e0))
+axs[1].plot(y, np.real(e1))
+axs[2].plot(y, np.real(e2))
+axs[3].plot(y, np.real(e3))
+axs[4].plot(y, np.real(e4))
+axs[5].plot(y, np.real(e5))
+plt.show()
 
-# fig, axs = plt.subplots(6)
-# fig.suptitle('Singular forcing modes')
-# axs[0].plot(y, f0)
-# axs[1].plot(y, f1)
-# axs[2].plot(y, f2)
-# axs[3].plot(y, f3)
-# axs[4].plot(y, f4)
-# axs[5].plot(y, f5)
-# plt.show()
+fig, axs = plt.subplots(6)
+fig.suptitle('Singular forcing modes')
+axs[0].plot(y, f0)
+axs[1].plot(y, f1)
+axs[2].plot(y, f2)
+axs[3].plot(y, f3)
+axs[4].plot(y, f4)
+axs[5].plot(y, f5)
+plt.show()
 
-gridpts = 50
-x = np.linspace(0, 1, gridpts)
-y = np.linspace(-1, 0, gridpts)
+# gridpts = 50
+# x = np.linspace(0, 1, gridpts)
+# y = np.linspace(-1, 0, gridpts)
 
-X, Y = np.meshgrid(x, y)
-Z = np.zeros([gridpts, gridpts])
+# X, Y = np.meshgrid(x, y)
+# Z = np.zeros([gridpts, gridpts])
 
-for i in range(0, gridpts):
-    for j in range(0, gridpts):
-        Z[j, i] = resolventNorm(x[i], y[j], M, L, F)
-    print("progress = ",(i*100)/gridpts,"%")
+# for i in range(0, gridpts):
+#     for j in range(0, gridpts):
+#         Z[j, i] = resolventNorm(x[i], y[j], M, L, F)
+#     print("progress = ",(i*100)/gridpts,"%")
         
-"Save data to file"
+# "Save data to file"
 
-np.savetxt('psuedospectrum.dat', Z, delimiter=',')  
-np.savetxt('X.dat', X, delimiter=',')
-np.savetxt('Y.dat', Y, delimiter=',')
+# np.savetxt('psuedospectrum.dat', Z, delimiter=',')  
+# np.savetxt('X.dat', X, delimiter=',')
+# np.savetxt('Y.dat', Y, delimiter=',')
 

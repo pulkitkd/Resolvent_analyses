@@ -9,17 +9,17 @@ from noSlipBC import *
 """
 Inputs
 """
-Re = 8000.
+Re = 1000.
 Reinv = 1.0/Re
-Ny = 128
+Ny = 256
 kx = 1.
 kz = 0.
 
 ksq = kx*kx + kz*kz
 n = Ny+1
 D, y = cheb(Ny)
-D2 = D@D
-D4 = D2@D2
+D2 = D @ D
+D4 = D2 @ D2
 Z = np.zeros((n, n))
 Idn = np.eye(n)
 U = 1. - y*y
@@ -41,15 +41,16 @@ M, L = noSlipBC(M,L,n)
 """
 Solve the generalized eigenvalue problem L x = i omega M x
 """
-w, v = eig(L, b=1j*M, check_finite=True)
+w, v = eig(L, b=M, check_finite=True)
 
 """
 Get the eigenvalues with largest imaginary parts
 """
-w = w
+w = -1j*w
 w = np.sort_complex(w)
-# print("Eigenvalues = ", w)
-print("Eigenvects = ", v)
+print("Eigenvalues = ", w)
+
+# print("Eigenvects = ", v)
 
 
 e0 = np.abs(v[0:n, 0])
@@ -62,6 +63,8 @@ e5 = np.abs(v[0:n, 5])
 """
 Plot the eigenvalues
 """
+# plt.plot(real(w),'.')
+# plt.ylim((-10,100))
 plt.scatter(np.real(w), np.imag(w))
 plt.xlim((0,1))
 plt.ylim((-1,0.5))
