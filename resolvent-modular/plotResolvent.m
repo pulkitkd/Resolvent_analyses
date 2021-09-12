@@ -3,7 +3,7 @@ Re = 75000
 k = 1;
 n = 10;
 omega = 0.8;
-N = 128;
+N = 512;
 nsvd = 20;
 mode = 1:3;
 [r,su,ss,sv,U0,yP,UP,dU0,dr,H] = resolventSVD(Re,k,n,omega,N,nsvd);
@@ -32,10 +32,10 @@ filename = sprintf('%d-%d-%d-%d-%d-%d-v_velocity_modes.png',Re,k,n,omega,N,nsvd)
 exportgraphics(image2,filename);
 hold off
 
-semilogy(ss(1:20), '*','linewidth',4)
-title('Singular values of the resolvent')
-xlabel('index')
-ylabel('singular value')
+% semilogy(ss(1:20), '*','linewidth',4)
+% title('Singular values of the resolvent')
+% xlabel('index')
+% ylabel('singular value')
 
 % clf('reset')
 

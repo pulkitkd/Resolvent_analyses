@@ -28,7 +28,7 @@ availableRe = 10.^(vels(vels(:,2)==0,1));
 %Calculate minimum % difference
 minDif = min(abs(Re-availableRe)/Re);
 %If difference > 10% display warning about potential interpolation
-if(minDif>0.1)s
+if(minDif>0.1)
     warning('Warning: No DNS or Superpipe data available within +/-10% of requested Re value.')
     warning('Interpolating based on available data, which could result in noisy profiles.') 
 end

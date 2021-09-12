@@ -9,11 +9,11 @@ from noSlipBC import *
 """
 Inputs
 """
-Re = 1000.
+Re = 5000.
 Reinv = 1.0/Re
-Ny = 256
+Ny = 100
 kx = 1.
-kz = 0.
+kz = 1.
 
 ksq = kx*kx + kz*kz
 n = Ny+1
@@ -35,6 +35,7 @@ L = np.block([[Los, np.zeros((n, n))],[1j*kz*(diag(Uy)), Lsq]])
 
 M = np.block([[(ksq*Idn - D2), np.zeros((n, n))], [np.zeros((n, n)), Idn ]])
 
+
 # Boundary conditions
 M, L = noSlipBC(M,L,n)
 
@@ -49,6 +50,16 @@ Get the eigenvalues with largest imaginary parts
 w = -1j*w
 w = np.sort_complex(w)
 print("Eigenvalues = ", w)
+
+wMaxImag = w[0]
+wMaxImagIndex = 0.
+
+for i in range (0, Ny):
+    if (imag(w[i])>wMaxImag):
+        wMaxImag = w[i]
+        wMaxImagIndex = i
+
+print("wMaxImag = ", wMaxImag, i)
 
 # print("Eigenvects = ", v)
 
@@ -74,43 +85,43 @@ plt.grid()
 plt.show()
 
 # plo the eigvects
-fig, axs = plt.subplots(6)
-fig.suptitle('Singular response modes')
-axs[0].plot(y, np.real(e0))
-axs[1].plot(y, np.real(e1))
-axs[2].plot(y, np.real(e2))
-axs[3].plot(y, np.real(e3))
-axs[4].plot(y, np.real(e4))
-axs[5].plot(y, np.real(e5))
-plt.show()
+# fig, axs = plt.subplots(6)
+# fig.suptitle('Singular response modes')
+# axs[0].plot(y, np.real(e0))
+# axs[1].plot(y, np.real(e1))
+# axs[2].plot(y, np.real(e2))
+# axs[3].plot(y, np.real(e3))
+# axs[4].plot(y, np.real(e4))
+# axs[5].plot(y, np.real(e5))
+# plt.show()
 
 
-"---------------------------Using Matrix Inversion-----------------------------"
-"""
-Solve the generalized eigenvalue problem M x = i omega L x
-"""
-Minv = np.linalg.inv(M)
-MinvL = Minv@L
-w, v = eig(MinvL, check_finite=True)
+# "---------------------------Using Matrix Inversion-----------------------------"
+# """
+# Solve the generalized eigenvalue problem M x = i omega L x
+# """
+# Minv = np.linalg.inv(M)
+# MinvL = Minv@L
+# w, v = eig(MinvL, check_finite=True)
 
-"""
-Get the eigenvalues with largest imaginary parts
-"""
+# """
+# Get the eigenvalues with largest imaginary parts
+# """
 
-w = -1j*w
-w = np.sort(w)
-# print("Eigenvalues = ", w)
+# w = -1j*w
+# w = np.sort(w)
+# # print("Eigenvalues = ", w)
 
-np.savetxt('OS_eigenvalues.dat', (np.real(w), np.imag(w)), delimiter=',')
+# np.savetxt('OS_eigenvalues.dat', (np.real(w), np.imag(w)), delimiter=',')
 
-"""
-Plot the eigenvalues
-"""
-plt.scatter(np.real(w), np.imag(w))
-plt.xlim((0,1))
-plt.ylim((-1,0.5))
-plt.xlabel("real")
-plt.ylabel("imag")
-plt.grid()
-plt.show()
+# """
+# Plot the eigenvalues
+# """
+# plt.scatter(np.real(w), np.imag(w))
+# plt.xlim((0,1))
+# plt.ylim((-1,0.5))
+# plt.xlabel("real")
+# plt.ylabel("imag")
+# plt.grid()
+# plt.show()
 

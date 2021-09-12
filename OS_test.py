@@ -7,7 +7,7 @@ from numpy import pi, cos, sin, diag
 from cheb_trefethen import *
 ##############################
 "Define the inputs"
-Re = 1000.
+Re = 10000.
 Reinv = 1./Re
 # N = 10
 Ny = 128

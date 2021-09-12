@@ -5,10 +5,10 @@ clc
 
 %% input parameters
 kx   = 1;
-kz   = 10;
-c    = 10;
+kz   = 5;
+c    = 1.0;
 om   = c*kx;
-Re   = 2003;
+Re   = 180;
 N    = 201;
 Nsvd = 6;
 
@@ -23,11 +23,12 @@ y = y(2:N-1); % for no slip BCs
 k2    = kx^2 + kz^2;
 Q     = generateWeightMatrix(N, k2);
 sqrtQ = sqrtm(Q);
-
+% invsqrtQ = inv(sqrtQ);
 %% compute resolvent operator
 I = eye(2*(N-2));
-% % H = (-1i*om*I - L)\I;
+% H = (-1i*om*I - L)\I;
 H = sqrtQ/(-1i*om*I - L)/sqrtQ;
+% H = sqrtQ*(-1i*om*I - L)*invsqrtQ;
 
 %% SVD
 [u, s, v] = svds(H, 20);
@@ -55,7 +56,7 @@ phi = C*v;
 % plot(y,real(psi(2*Ni+1:3*Ni,1)),'LineWidth',2)
 % ylabel('w');xlabel('y');
 
-%% plot several psi modes to see the trend
+%% plot several psi (response) modes to see the trend
 figure
 Ni = N-2;
 
@@ -69,7 +70,7 @@ fname = sprintf('%d-%d-%d-%d-response_modes.png',Re,kx,kz,om);
 set(gcf,'units','normalized','outerposition',[0 0 1 1]);
 saveas(gcf,fname);
 
-%% plot several phi modes to see the trend
+%% plot several phi (forcing) modes to see the trend
 
 figure;
 Ni = N-2;
@@ -79,6 +80,7 @@ for i = 1:Nsvd
     plot(y, real(phi(1:Ni,i)), 'LineWidth', 2);
     ylabel('fv'); xlabel('y');
 end
+
 sgtitle('Forcing modes');
 fname = sprintf('%d-%d-%d-%d-forcing_modes.png',Re,kx,kz,om);
 set(gcf,'units','normalized','outerposition',[0 0 1 1]);

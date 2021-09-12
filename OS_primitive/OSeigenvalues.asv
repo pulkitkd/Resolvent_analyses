@@ -1,0 +1,47 @@
+clear
+clc
+
+% channel resolvent in primitive variable formulation 
+
+%% input parameters
+
+kx   = 1;
+kz   = 1;
+Re   = 5000;
+N    = 200;
+
+%% build operators
+
+[M, L] = LNS_operators(kx, kz, N, Re);
+
+%% no slip boundary conditions
+% no condition for pressure
+L(1,:) = 0;
+L(N,:) = 0;
+L(N+1, :) = 0;
+L(2*N,:) = 0;
+L(2*N+1,:) = 0;
+L(3*N,:) = 0;
+
+
+L(1,1) = 1;
+L(N,N) = 1;
+L(N+1,N+1) = 1;
+L(2*N,2*N) = 1;
+L(2*N+1,2*N+1) = 1;
+L(3*N+1,3*N+1) = 1;
+
+
+M(1,:) = 0;
+M(N,:) = 0;
+M(N+1,:) = 0;
+M(2*N,:) = 0;
+M(2*N+1,:) = 0;
+M(3*N,:) = 0;
+
+ee = eig(L, M);
+ee = sort(ee);
+
+%% plot the eigenvalues
+plot(ee(410:70),'.','markersize',12)
+% axis([0 1 -1 0]);

@@ -17,7 +17,7 @@ k4   = k2^2;
 I    = eye(N-2);
 Z    = zeros(N-2);
 U0y  = D1*U0; % mean shear
-U0yy = D2*U0; % second derivative of mean profile
+U0yy = D1*D1*U0; % second derivative of mean profile
 
 %% incorporate homogenous BCs (Dirichilet)
 D1   = D1(2:N-1,2:N-1);
@@ -39,7 +39,7 @@ L12 = Z;
 L21 = -1i*kz*U0y; % coupling operator
 L22 = 1/Re*Delta - 1i*kx*U0; % Sq operator
 L   = [L11, L12; L21, L22];
-
+cond(L)
 %% also compute output operator that maps [v; eta] to [u; v; w]
 Cu = [1i*kx*D1, -1i*kz*I]/k2;
 Cv = [I, Z];

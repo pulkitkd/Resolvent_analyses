@@ -7,22 +7,25 @@ from scipy.linalg import sqrtm
 import dmsuite as dm
 from get_F import *
 from OSQoperators import *
+from noSlipBC import *
 
 np.set_printoptions(suppress=True)
 np.set_printoptions(precision=5)
 
 n = 200
 kx = 1.
-kz = 10.
-omega = 10.
+kz = 1.
+omega = 1.
 Re = 2003
 # Re = 1005.5
 # Re = 2389.56
 
-y, D4 =  dm.cheb4c(n)           # fourth derivative with clamped BC (n-1 X n-1)
-y, D = dm.chebdif(n, 2)         # first two derivatives (2 X n+1 X n+1)
+# y, D4 =  dm.cheb4c(n)           # fourth derivative with clamped BC (n-1 X n-1)
+y, D = dm.chebdif(n, 4)         # first four derivatives (4 X n+1 X n+1)
 D1 = D[0,:,:]                   # first derivative (n+1 X n+1)
 D2 = D[1,:,:]                   # second derivative (n+1 X n+1)
+D4 = D[3,:,:]                   # fourth derivative (n+1 X n+1)
+
 
 "Velocity field and its derivatives============================================"
 # y96, D96 = dm.chebdif(200, 1)    
@@ -39,17 +42,52 @@ Uyy = D2 @ U
 
 
 "Apply homogeneous BCs========================================================="
-y = y[1:n]
-D1 = D1[1:n,1:n]
-D2 = D2[1:n,1:n]
-U = U[1:n]
-Uy = Uy[1:n]
-Uyy = Uyy[1:n]
+# y = y[1:n]
+# D1 = D1[1:n,1:n]
+# D2 = D2[1:n,1:n]
+# U = U[1:n]
+# Uy = Uy[1:n]
+# Uyy = Uyy[1:n]
 
 "Create operators=============================================================="
-M, L, B, C = OSQoperators(n, Re, kx, kz, U, Uy, Uyy, D1, D2, D4)
+M, L, B, C = OSQoperators(Re, kx, kz, U, Uy, Uyy, D1, D2, D4)
 
+"""
+LHS = -1j*omega*M + L #This approach gives nearly singular LHS
+"""
+RHS = np.eye(2*(n+1))
 
+"Apply BCs====================================================================="
+
+M, L = noSlipBC(D1, M, L, n)
+LHS = -1j*omega*M + L
+print("LHS cond = ", cond(LHS))
+
+# v = 0 @ y = -1
+
+RHS[0, :] = 0.
+
+# v = 0 @ y = 1
+
+RHS[n, :] = 0.
+
+# dv/dy = 0 @ y = -1
+
+RHS[1, :] = 0.
+
+# dv/dy = 0 @ y = 1
+
+RHS[n-1, :] = 0.
+
+# eta = 0 @ y = -1
+
+RHS[n+1, :] = 0.
+
+# eta = 0 @ y = 1
+
+RHS[n+n+1, :] = 0.
+
+"""
 "Build weight matrix to enforce energy norm of the resolvent==================="
 ksq = kx*kx + kz*kz
 W, F = get_F(ksq, n)
@@ -59,30 +97,33 @@ Finv = inv(F)
 "Build a matrix to impose BCs on the RHS======================================="
 Id2n = np.eye(2*n-2)
 
-
+"""
 "Get the resolvent, scale it and take its SVD=================================="
-H = inv(-1j*omega*Id2n + L)
+print("condition no LHS = ", cond(LHS))
+print("shape LHS = ", np.shape(LHS))
 
-print("H = ", H, "shape(H)", shape(H))
 
-Hs = F @ H @ Finv
-Psi, Sigma, PhiH = svd(Hs)
+H = inv(LHS) @ RHS
+
+# print("H = ", H, "shape(H)", shape(H))
+# Hs = F @ H @ Finv
+Psi, Sigma, PhiH = svd(H)
 
 
 print("Singular values", Sigma[0:20])
-"""
-Check SVD and othogonality
-"""
-print("check ", np.allclose(Hs, Psi@diag(Sigma)@PhiH))
-print("check ", np.allclose(Psi@np.transpose(np.conj(Psi)), Id2n))
+
+# Check SVD and othogonality
+
+print("check ", np.allclose(H, Psi@diag(Sigma)@PhiH))
+print("check ", np.allclose(Psi@np.transpose(np.conj(Psi)), np.eye(2*n+2)))
 print("check ", np.allclose(np.transpose(np.conj(Psi))@Psi, Psi@np.conj(np.transpose(Psi)), rtol=1e-8))
 
-Psi = Finv @ Psi
-Phi = np.transpose(np.conj(PhiH))
-Phi = Finv @ Phi
+# Psi = Finv @ Psi
+# Phi = np.transpose(np.conj(PhiH))
+# Phi = Finv @ Phi
 
-Psi = C @ Psi
-Phi = C @ Phi
+# Psi = C @ Psi
+# Phi = C @ Phi
 
 "Plotting======================================================================"
 
@@ -91,10 +132,10 @@ Phi = C @ Phi
 
 Nmodes = 6
 
-e = zeros([n-1, Nmodes])
+e = zeros([n+1, Nmodes])
 
 for i in range(0, Nmodes):
-    e[:,i] = Psi[0:n-1, i]
+    e[:, i] = Psi[0:n+1, i]
     print(i)
     
 
@@ -115,3 +156,4 @@ plt.xlabel("index")
 plt.ylabel("sigma")
 fig.savefig('images/'+str(Re)+'-'+str(kx)+'-'+str(kz)+'-'+str(omega)+'_singular_values.png')
 plt.show()
+# """

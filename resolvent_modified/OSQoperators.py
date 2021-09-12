@@ -1,11 +1,13 @@
 import numpy as np
 from numpy import diag, sin, cos
 
-def OSQoperators(n, Re, kx, kz, U, Uy, Uyy, D1, D2, D4):
+def OSQoperators(Re, kx, kz, U, Uy, Uyy, D1, D2, D4):
     Reinv = 1.0/Re
     ksq = kx*kx + kz*kz
-    Z = np.zeros((n-1, n-1))
-    Idn = np.eye(n-1)
+    n = np.shape(U)
+    n = n[0]
+    Z = np.zeros((n, n))
+    Idn = np.eye(n)
     U = diag(U)
     Uy = diag(Uy)
     Uyy = diag(Uyy)
