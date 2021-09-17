@@ -5,8 +5,8 @@ clc
 
 %% input parameters
 kx   = 1;
-kz   = 5;
-c    = 1.0;
+kz   = 10;
+c    = 0.5;
 om   = c*kx;
 Re   = 180;
 N    = 201;
@@ -26,6 +26,7 @@ sqrtQ = sqrtm(Q);
 % invsqrtQ = inv(sqrtQ);
 %% compute resolvent operator
 I = eye(2*(N-2));
+% sqrtQ = I;
 % H = (-1i*om*I - L)\I;
 H = sqrtQ/(-1i*om*I - L)/sqrtQ;
 % H = sqrtQ*(-1i*om*I - L)*invsqrtQ;
@@ -41,7 +42,7 @@ psi = C*u;
 phi = C*v;
 
 %% enforce symmetry in across channel centerline
-[psi, phi] = channelSym(psi, phi, s, Nsvd);
+% [psi, phi] = channelSym(psi, phi, s, Nsvd);
 
 %% plot psi_1
 % Ni = N-2;
@@ -90,6 +91,6 @@ saveas(gcf,fname);
 figure
 semilogy(s,'o');
 ylabel('sigma'); xlabel('index');
-title('Singular values');
+title('Singular values (v-eta)');
 fname = sprintf('%d-%d-%d-%d-singular_values.png',Re,kx,kz,om);
 saveas(gcf,fname);

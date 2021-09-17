@@ -1,0 +1,7 @@
+function [W] = weight_matrix(N)
+
+[~,w] = clencurt(N);
+
+Iw = 
+
+end
