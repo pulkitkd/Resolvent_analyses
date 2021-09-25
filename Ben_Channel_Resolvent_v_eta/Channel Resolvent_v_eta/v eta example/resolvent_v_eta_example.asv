@@ -38,11 +38,11 @@ u = sqrtQ\u;
 v = sqrtQ\v;
 
 %% map to [u; v; w]
-psi = C*u;
-phi = C*v;
+% psi = C*u;
+% phi = C*v;
 
 %% enforce symmetry in across channel centerline
-[psi, phi] = channelSym(psi, phi, s, Nsvd);
+% [psi, phi] = channelSym(psi, phi, s, Nsvd);
 
 %% plot psi_1
 % Ni = N-2;
@@ -60,12 +60,10 @@ phi = C*v;
 %% plot several psi (response) modes to see the trend
 figure
 Ni = N-2;
-field = 1; % u = 0, v = 1, w = 2, p = 3
-
 
 for i = 1:Nsvd
     subplot(Nsvd/2,2,i)
-    plot(y, real(psi(field*Ni+1:(field+1)*Ni,i)), 'LineWidth', 2)
+    plot(y, real(u(Ni1:Ni,i)), 'LineWidth', 2)
     ylabel('v'); xlabel('y');
 end
 

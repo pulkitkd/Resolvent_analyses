@@ -14,10 +14,10 @@ def OSQoperators(n, Re, kx, kz, U, Uy, Uyy, D1, D2, D4):
     M = np.block([[ksq*Idn - D2, Z], [Z, Idn]])
 
     Los = 1j*kx*U@(ksq*Idn - D2) + 1j*kx*Uyy + Reinv*(D4 - (2*ksq)*D2 + (ksq**2)*Idn)
-    Lsq = (1j*kx)*U + Reinv*(ksq*Idn - D2)
+    Lsq = -(1j*kx)*U - Reinv*(ksq*Idn - D2)
     L11 = deltaInv @ Los
     L12 = Z
-    L21 = 1j*kz*Uy
+    L21 = -1j*kz*Uy
     L22 = Lsq
     
     L = np.block([[L11, L12],[L21, L22]])

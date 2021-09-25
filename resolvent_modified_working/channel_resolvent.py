@@ -51,21 +51,29 @@ Uyy = Uyy[1:n]
 "Create operators=============================================================="
 M, L, B, C = OSQoperators(n, Re, kx, kz, U, Uy, Uyy, D1, D2, D4)
 
-
 "Build weight matrix to enforce energy norm of the resolvent==================="
 ksq = kx*kx + kz*kz
 W, F = get_F(ksq, n)
 F = sqrtm(W)
 Finv = inv(F)
 
+print("W = ", W)
+print("diag(W) = ",diag(W))
+print("shape(W) =", shape(W))
+
 "Build a matrix to impose BCs on the RHS======================================="
 Id2n = np.eye(2*n-2)
 
 
 "Get the resolvent, scale it and take its SVD=================================="
-H = inv(-1j*omega*Id2n + L)
+H = inv(-1j*omega*Id2n - L)
 
-print("H = ", H, "shape(H)", shape(H))
+print("H = ",H)
+print("shape(H) = ", shape(H))
+
+with open('H.txt','wb') as f:
+    for line in H:
+        np.savetxt(f, line, fmt='%.2f')
 
 Hs = F @ H @ Finv
 Psi, Sigma, PhiH = svd(Hs)
