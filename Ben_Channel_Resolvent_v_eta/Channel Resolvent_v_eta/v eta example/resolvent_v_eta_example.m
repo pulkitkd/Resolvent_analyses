@@ -5,10 +5,10 @@ clc
 
 %% input parameters
 kx   = 1;
-kz   = 10;
-c    = 0.5;
+kz   = 12;
+c    = 0.667;
 om   = c*kx;
-Re   = 2003;
+Re   = 187;
 N    = 201;
 Nsvd = 16;
 
@@ -60,7 +60,7 @@ phi = C*v;
 %% plot several psi (response) modes to see the trend
 figure
 Ni = N-2;
-field = 1; % u = 0, v = 1, w = 2, p = 3
+field =0; % u = 0, v = 1, w = 2, p = 3
 
 
 for i = 1:Nsvd

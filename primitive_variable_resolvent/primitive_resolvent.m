@@ -66,9 +66,10 @@ Hs = Hs(1:3*N,1:3*N);
 
 [su, s, sv] = svds(Hs, 20);
 s = diag(s);
+test = conj(su)'*su;
 u = iW(1:3*N,1:3*N)*su;
 v = iW(1:3*N,1:3*N)*sv;
-
+imagesc(real(u))
 %% enforce channel symmetry
 
 [u, v] = channelSym(u, v, s, Nsvd);
@@ -82,8 +83,8 @@ xlabel('index');
 title('Singular values (primitive)');
 grid on
 grid minor
-% fname = sprintf('%d-%d-%d-%d-singular_values.png',Re,kx,kz,omega);
-% saveas(gcf,fname);
+fname = sprintf('%d-%d-%d-%d-singular_values.png',Re,kx,kz,omega);
+saveas(gcf,fname);
 
 % singular response modes
 field = 2; % u = 0, v = 1, w = 2, p = 3
@@ -103,7 +104,7 @@ saveas(gcf,fname);
 
 
 % % singular forcing modes
-% field = 1; % u = 0, v = 1, w = 2, p = 3
+% field = 2; % u = 0, v = 1, w = 2, p = 3
 % 
 % figure
 % for i = 1:Nsvd
