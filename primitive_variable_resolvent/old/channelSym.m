@@ -22,7 +22,7 @@ for i = 1:2:nsvd
         ind = ind-1;
     end
     
-    % if pairs 'unequal', do nothing (these modes are aleady symmetric)
+    % if pairs 'unequal', do nothing (these modes are aleady symmertric)
     if ( sig(i)/sig(i+1) > 1.01 ) || ...
        ( abs(psi(cntr, i) - psi(cntr, i+1)) > 1e-3 )     
     

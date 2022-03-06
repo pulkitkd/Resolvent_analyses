@@ -4,8 +4,8 @@ clear
 clc
 
 %% input parameters
-K1 = [1            ,2            , 1];
-K2 = [-1            ,2            , 1];
+K1 = [6            ,6            , 0.667];
+K2 = [1            ,6            , K1(3)];
 K3 = [K1(1) + K2(1),K1(2) + K2(2), K1(3)];
 Re = 200;
 N  = 151;
@@ -16,14 +16,11 @@ Z1 = 0:0.1:1;
 
 % specify a guess for the weights
 
-% chi0 = [1 12 1 1 1 1];
-chi0 = [-7.7328 - 0.3768i   7.7394 + 0.2028i  -0.0863 - 0.0065i   2.7303 - 7.2446i   7.6009 + 1.4712i   0.0454 - 0.0737i];
-% chi0 = (5+9i)*[1 1 1 1 1 1];
-% chi0 = 10.0*(rand(6,1) + 1j*rand(6,1))';
+chi0 = [1 12 1 1 1 1];
+% chi0 = 1.0*(rand(6,1) + 1j*rand(6,1))';
 
 % The mean velocity remains the same for all interaction coeff.
 [y, ~, ~, ~, U0] = channelMeanVel(Re, N);
-% U0 = 1-y.^2;
 
 %% Create the set of 12 Fourier modes
 triad1 = [K1;K2;K3];
@@ -46,31 +43,34 @@ psi = zeros(3*N,6);
 [IntCoeff(4),s(4),psi(:,4)] = getIntCoeff(triad(6,:),triad(11 ,:),Re,N,Nsvd,U0,y);
 [IntCoeff(5),s(5),psi(:,5)] = getIntCoeff(triad(6,:),triad(10,:),Re,N,Nsvd,U0,y);
 [IntCoeff(6),s(6),psi(:,6)] = getIntCoeff(triad(4,:),triad(5 ,:),Re,N,Nsvd,U0,y);
-IntCoeff
+
 %% Create the system of equations and solve it
+% plot(y,psi(2*N+1:3*N,:))
 func = @(chi)weightEquations(chi,IntCoeff);
+% load('weights.mat')
+% chi0 = 100*(rand(6,1) + 1j*rand(6,1))';
+% chi0 = zeros(1,6);
 options = optimoptions('fsolve','Algorithm','trust-region','Display','iter-detailed');
 chi = fsolve(func,chi0,options)
-
-%% create the optimization function and minimize it
-% Problematic because it only optimizes over real values
 
 % [x, D] = chebdif(N, 2);
 % % D1 = D(:,:,1);
 % D2 = D(:,:,2);
-% ReStressMean = (D2*U0)/Re + 5;
+% ReStressMean = (D2*U0)/Re - 5;
 % 
 % f01 = getMeanf0(K1,Re,N,Nsvd,U0,y);
 % f02 = getMeanf0(K2,Re,N,Nsvd,U0,y);
 % f03 = getMeanf0(K3,Re,N,Nsvd,U0,y);
-% 
-% a = 0.99;
+
+%% create the minimization function
+
+% a = 0.9;
 % fun = @(chi)(a*(abs(chi(3)*chi(2)'*IntCoeff(1) - chi(1)) +...
 %                 abs(chi(3)*chi(1)'*IntCoeff(2) - chi(2)) +...
-%                 abs(chi(1)*chi(2)'*IntCoeff(3) - chi(3)) +...
+%                 abs(chi(1)*chi(2)*IntCoeff(3) - chi(3)) +... %!!
 %                 abs(chi(6)*chi(5)'*IntCoeff(4) - chi(4)) +...
 %                 abs(chi(6)*chi(4)'*IntCoeff(5) - chi(5)) +...
-%                 abs(chi(4)*chi(5)'*IntCoeff(6) - chi(6)))^2 +...
+%                 abs(chi(4)*chi(5)*IntCoeff(6) - chi(6)))^2 +...%!!
 %             (1-a)*(norm(ReStressMean - chi(1)*chi(1)'*f01(N+1:2*N) -...
 %             chi(2)*chi(2)'*f02(N+1:2*N) - chi(3)*chi(3)'*f03(N+1:2*N))/norm(ReStressMean))^2);
 % 
@@ -109,7 +109,7 @@ uFinal = uFinal + uMean;
 
 %% Plot the velocity field (in y)
 figure(1)
-plot(Y1,uFinal(:,5,10).*uFinal(:,5,10))
+plot(Y1,uFinal(:,2,10).*uFinal(:,2,10))
 
 %% Plot the velocity field (in x y z)
 figure(2)

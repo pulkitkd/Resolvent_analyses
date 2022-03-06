@@ -4,26 +4,18 @@ clear
 clc
 
 %% input parameters
-K1 = [1            ,2            , 1];
-K2 = [-1            ,2            , 1];
+K1 = [-1            ,2            , 1];
+K2 = [1            ,2           , 1];
 K3 = [K1(1) + K2(1),K1(2) + K2(2), K1(3)];
 Re = 200;
 N  = 151;
 Nsvd = 10;
-X1 = 0:0.01:2*pi;
+
+[y, ~, ~, ~, U0] = channelMeanVel(Re, N);
+
+X1 = 0:0.02:4*pi;
 Y1 = -1:0.01:1;
 Z1 = 0:0.1:1;
-
-% specify a guess for the weights
-
-% chi0 = [1 12 1 1 1 1];
-chi0 = [-7.7328 - 0.3768i   7.7394 + 0.2028i  -0.0863 - 0.0065i   2.7303 - 7.2446i   7.6009 + 1.4712i   0.0454 - 0.0737i];
-% chi0 = (5+9i)*[1 1 1 1 1 1];
-% chi0 = 10.0*(rand(6,1) + 1j*rand(6,1))';
-
-% The mean velocity remains the same for all interaction coeff.
-[y, ~, ~, ~, U0] = channelMeanVel(Re, N);
-% U0 = 1-y.^2;
 
 %% Create the set of 12 Fourier modes
 triad1 = [K1;K2;K3];
@@ -46,12 +38,23 @@ psi = zeros(3*N,6);
 [IntCoeff(4),s(4),psi(:,4)] = getIntCoeff(triad(6,:),triad(11 ,:),Re,N,Nsvd,U0,y);
 [IntCoeff(5),s(5),psi(:,5)] = getIntCoeff(triad(6,:),triad(10,:),Re,N,Nsvd,U0,y);
 [IntCoeff(6),s(6),psi(:,6)] = getIntCoeff(triad(4,:),triad(5 ,:),Re,N,Nsvd,U0,y);
-IntCoeff
-%% Create the system of equations and solve it
-func = @(chi)weightEquations(chi,IntCoeff);
-options = optimoptions('fsolve','Algorithm','trust-region','Display','iter-detailed');
-chi = fsolve(func,chi0,options)
+disp(IntCoeff)
 
+%% Create the system of equations and solve it
+chi = 1e-7*[1,1,1,1,1,1];
+re = 0;
+im = 3;
+if IntCoeff(1)*IntCoeff(3)>0 && IntCoeff(2)*IntCoeff(3)>0 && IntCoeff(2)*IntCoeff(1)>0 
+    while (norm(chi)<1e-3)
+        chi0 = (-10+20*rand(6,1) + 1j*(-10+20*rand(6,1)))';
+        func = @(chi)weightEquations(chi,IntCoeff);
+        options = optimoptions('fsolve','Algorithm','trust-region','Display','iter-detailed');
+        chi = fsolve(func,chi0,options);
+        disp(chi)
+    end
+else
+    disp('constraints not satisfied')
+end
 %% create the optimization function and minimize it
 % Problematic because it only optimizes over real values
 
@@ -92,7 +95,6 @@ wFinal = zeros(size(X));
 fU0 = griddedInterpolant(flip(y),flip(U0));
 uMean = fU0(Y);
 
-
 for i=1:6
    kx = triad(i,1);
    kz = triad(i,2);
@@ -113,8 +115,25 @@ plot(Y1,uFinal(:,5,10).*uFinal(:,5,10))
 
 %% Plot the velocity field (in x y z)
 figure(2)
-halfy = 1:floor(length(Y1)/8);
-data = squeeze(uFinal(halfy,:,1));
-contourf(X1,halfy,data)
+party = 1:floor(length(Y1)/8);
+data = squeeze(uFinal(party,:,1));
+contourf(X1,party,data)
 colormap("parula")
 colorbar("eastoutside")
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Possible sensible solutions
+
+% (1,2,1)
+% (-1,2,1)
+% Re = 200
+% N = 151
+% -7.7328 - 0.3768i   7.7394 + 0.2028i  -0.0863 - 0.0065i   2.7303 - 7.2446i   7.6009 + 1.4712i   0.0454 - 0.0737i
+
+
+
+
+
+
+

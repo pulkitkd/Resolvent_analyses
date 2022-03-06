@@ -1,3 +1,5 @@
+*.mat
+*.fig
 *.dat
 *.txt
 *.zip

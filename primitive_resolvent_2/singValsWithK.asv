@@ -1,0 +1,60 @@
+%% input parameters
+
+clc
+clear
+
+Re   = 1000;
+Nsvd = 6; 
+
+%% get mean velocity profile
+N = 100;
+[y, ~, ~, ~, U0] = channelMeanVel(Re, N); %length(U0) = length(y)
+U0max = max(U0);
+
+
+%% obtain the variation of singular values
+kx = -12:12;
+kz = 0:15;
+singVals = zeros(length(kz),length(kx),Nsvd);
+
+for itr = 1:20
+    c = 0.1*itr*U0max;
+    disp(itr)
+    for i = 1:length(kx)
+        kx1 = kx(i);
+        for j = 1:length(kz)
+            kz1 = kz(j);
+            if kx1==0 && kz1==0
+                singVals(j,i,:) = NaN;
+            else
+            [~, s, ~] = getResolventSVD(kx1, kz1, c, Re, N, Nsvd, U0);
+            singVals(j,i,:) = s(1:Nsvd);
+            end
+        end
+    end
+
+    E12 = (singVals(:,:,1).^2 + singVals(:,:,2).^2)./(sum(singVals.^2,3));
+    
+    str1 = sprintf('data/Re=%d_c=%.2f.mat',Re,c);
+    str2 = sprintf('log(sigma_{max}) vs (kx,kz) for Re=%d c=%.2f',Re,c/U0max);
+    str3 = sprintf('sigma_with_K/Re=%d-image%d.png',Re,itr);
+    str4 = sprintf('ratio of s_1^2+s_2^2 / Sum(s^2) for Re=%d c=%.2f',Re,c/U0max);
+    str5 = sprintf('fractional_energy/Re=%d-image%d.png',Re,itr);
+    
+    save(str1,'singVals')
+    
+    %% plot the results
+    contourf(kx,kz,log(singVals(1:length(kz),1:length(kx),1)));
+    colorbar('eastoutside')
+    xlabel('kx');
+    ylabel('kz');
+    title(str2);
+    saveas(gcf,str3)
+
+    contourf(kx,kz,E12);
+    colorbar('eastoutside')
+    xlabel('kx');
+    ylabel('kz');
+    title(str4);
+    saveas(gcf,str5)
+end
